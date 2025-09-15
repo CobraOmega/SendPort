@@ -1,6 +1,6 @@
 # loads env vars for SMTP
 
-from pydantic import BaseSettings, AnyHttpUrl, validator
+from pydantic_settings import BaseSettings, AnyHttpUrl, validator
 from typing import Optional
 
 class Settings(BaseSettings):

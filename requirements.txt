@@ -3,6 +3,6 @@ uvicorn
 python-dotenv
 Jinja2
 email-validator
-pydantic
+pydantic-settings
 pytest
 mailhog # for test purposes only.
