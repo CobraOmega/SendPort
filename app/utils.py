@@ -7,13 +7,12 @@ from .config import settings
 from .templates_loader import render_template
 import logging
 
-logger = logging.getLogger("utils")
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def Build_Message(to_email: str, subject: str, body_text: str, body_html: Optional[str], from_email: Optional[str]) -> EmailMessage:
-    msg = EmailMessage
-    msg["from"] = from_email or settings.DEFAULT_FROM
-    msg["to"] = to_email
+def build_message(to_email: str, subject: str, body_text: str, body_html: Optional[str], from_email: Optional[str]) -> EmailMessage:
+    msg = EmailMessage()
+    msg["From"] = from_email or settings.DEFAULT_FROM
+    msg["To"] = to_email
     msg["Subject"] = subject
     msg.set_content(body_text)
     if body_html:
@@ -23,17 +22,17 @@ def Build_Message(to_email: str, subject: str, body_text: str, body_html: Option
 def send_via_smtp(msg: EmailMessage):
     host = settings.SMTP_HOST
     port = settings.SMTP_PORT
-    user = settings.SMTP_HOST
+    user = settings.SMTP_USER
     pwd = settings.SMTP_PASS
 
     logger.info("connecting to SMTP %s:%s", host, port)
     try:
-        with smtplib(host, port, timeout = 30) as smtp:
+        with smtplib.SMTP(host, port, timeout = 30) as smtp:
             #Use TLS for port
             if port == 587:
-                smtp.elho()
+                smtp.ehlo()
                 smtp.starttls()
-                smtp.elho()
+                smtp.ehlo()
             if user and pwd:
                 smtp.login(user, pwd)
             smtp.send_message(msg)
