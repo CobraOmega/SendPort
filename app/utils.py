@@ -42,7 +42,7 @@ def send_via_smtp(msg: EmailMessage):
         raise
 
 def send_email_raw(to: str, subject: str, body_text: str, body_html: Optional[str] = None, from_email: Optional[str] = None):
-    msg = Build_Message(to, subject, body_text, body_html, from_email)
+    msg = build_message(to, subject, body_text, body_html, from_email)
     send_via_smtp(msg)
 
 def send_using_template(template_name: str, to: str, subject: str, context: dict, from_email: Optional[str]=None):
