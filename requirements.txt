@@ -5,3 +5,4 @@ Jinja2
 email-validator
 pydantic
 pytest
+mailhog # for test purposes only.
