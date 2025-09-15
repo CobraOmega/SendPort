@@ -1,0 +1,1 @@
+# loads env vars for SMTP
