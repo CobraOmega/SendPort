@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     SERVICE_API_KEY: str = "change-me"
+    REDIS_URL: str = "redis://localhost:6379/0"
+    ENV: str = "dev" 
 
     class Config:
         env_file = ".env"

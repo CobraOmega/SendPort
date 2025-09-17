@@ -28,13 +28,15 @@ def send_via_smtp(msg: EmailMessage):
     logger.info("connecting to SMTP %s:%s", host, port)
     try:
         with smtplib.SMTP(host, port, timeout = 30) as smtp:
+            if settings.ENV =="prod":
             #Use TLS for port
-            if port == 587:
-                smtp.ehlo()
-                smtp.starttls()
-                smtp.ehlo()
-            if user and pwd:
-                smtp.login(user, pwd)
+                if port == 587:
+                    smtp.ehlo()
+                    smtp.starttls()
+                    smtp.ehlo()
+                if user and pwd:
+                    smtp.login(user, pwd)
+                    
             smtp.send_message(msg)
         logger.info("Email sent to %s", msg["to"])
     except Exception as e:
