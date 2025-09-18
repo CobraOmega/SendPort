@@ -1,28 +1,49 @@
-version: "3.9"
-
 services:
   api:
     build: .
     container_name: email_api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASS=
+      - DEFAULT_FROM=no-reply@example.com
+      - SERVICE_API_KEY=change-me
     depends_on:
       - redis
+      - mailhog
 
   worker:
     build: .
     container_name: email_worker
-    command: celery -A app.celery_app worker --loglevel=info
+    command: celery -A app.celery_app.celery_app worker --loglevel=info -Q emails
     env_file:
       - .env
+    environment:
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASS=
+      - DEFAULT_FROM=no-reply@example.com
+      - SERVICE_API_KEY=change-me
     depends_on:
       - redis
+      - mailhog
 
   redis:
-    image: redis:7
+    image: redis:alpine
     container_name: email_redis
     ports:
       - "6379:6379"
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: email_mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI

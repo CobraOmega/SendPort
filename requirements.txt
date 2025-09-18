@@ -8,3 +8,4 @@ celery[standard]
 pydantic-settings
 pytest
 locust
+boto3

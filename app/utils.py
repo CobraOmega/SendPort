@@ -1,11 +1,11 @@
-# helper functions
-
 import smtplib
 from email.message import EmailMessage
 from typing import Optional
 from .config import settings
 from .templates_loader import render_template
 import logging
+import boto3
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger(__name__)
 
@@ -20,28 +20,57 @@ def build_message(to_email: str, subject: str, body_text: str, body_html: Option
     return msg
 
 def send_via_smtp(msg: EmailMessage):
-    host = settings.SMTP_HOST
-    port = settings.SMTP_PORT
-    user = settings.SMTP_USER
-    pwd = settings.SMTP_PASS
+    host = settings.MAIL_HOST
+    port = settings.MAIL_PORT
+    user = settings.MAIL_USER
+    pwd = settings.MAIL_PASS
 
     logger.info("connecting to SMTP %s:%s", host, port)
     try:
         with smtplib.SMTP(host, port, timeout = 30) as smtp:
-            if settings.ENV =="prod":
-            #Use TLS for port
-                if port == 587:
+            if port == 587 or settings.MAIL_PROVIDER == "smtp":
+                try:
                     smtp.ehlo()
                     smtp.starttls()
                     smtp.ehlo()
-                if user and pwd:
-                    smtp.login(user, pwd)
-                    
+                except Exception:
+                    pass
+
+            if user and pwd:
+                smtp.login(user, pwd)
+                            
             smtp.send_message(msg)
         logger.info("Email sent to %s", msg["to"])
     except Exception as e:
         logger.exception("SMTP send failed %s", e)
         raise
+
+# SES via boto3
+def send_ses_api(msg: EmailMessage):
+    logger.info("SES API sending via region %s to %s", settings.AWS_REGION, msg["To"])
+    ses = boto3.client(
+        "ses",
+        region_name=settings.AWS_REGION,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    )
+
+    #create raw message bytes (for html alternative)
+    raw = msg.as_bytes()
+    try:
+        resp = ses.send_raw_email(RawMessage={"Data": raw})
+        logger.info("SES send_raw_email message id: %s", resp.get("MessageId"))
+        return {"status": "sent", "message_id": resp.get("MessageId")}
+    except ClientError as e:
+        logger.exception("SES send failed: %s", e)
+        raise
+
+# Used by tasks
+def send_via_selected_provider(msg: EmailMessage):
+    if settings.MAIL_PROVIDER == "ses-api":
+        return send_ses_api(msg)
+    else:
+        return send_via_smtp(msg)
 
 def send_email_raw(to: str, subject: str, body_text: str, body_html: Optional[str] = None, from_email: Optional[str] = None):
     msg = build_message(to, subject, body_text, body_html, from_email)
@@ -51,7 +80,7 @@ def send_using_template(template_name: str, to: str, subject: str, context: dict
     body_text = ""
     body_html = None
     try:
-        # Try .txt
+        # try .txt
         body_text = render_template(template_name + ".txt", context)
     except Exception:
         # if not found, fallback to rendering html as text
@@ -68,4 +97,4 @@ def send_using_template(template_name: str, to: str, subject: str, context: dict
     if not body_text and not body_html:
         raise ValueError("No templates found for %s" % template_name)
 
-    send_email_raw(to, subject, body_text, body_html, from_email)
+    return send_email_raw(to, subject, body_text, body_html, from_email)
