@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def build_message(to_email: str, subject: str, body_text: str, body_html: Optional[str], from_email: Optional[str]) -> EmailMessage:
     msg = EmailMessage()
-    msg["From"] = from_email or settings.DEFAULT_FROM
+    msg["From"] = from_email or settings.MAIL_FROM
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.set_content(body_text)

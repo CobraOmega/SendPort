@@ -19,6 +19,6 @@ class EmailUser(HttpUser):
             "context": {"body": f"This is test email number {email_id}"},
         }
 
-        headers = {"x-api-key": "super-secret-dev-key"}
+        headers = {"x-api-key": "Testkey123"}
 
         self.client.post("/send-email", json=payload, headers=headers)

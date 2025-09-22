@@ -10,13 +10,15 @@ class Settings(BaseSettings):
     MAIL_PORT: int = 587
     MAIL_USER: Optional[str] = None
     MAIL_PASS: Optional[str] = None
-    DEFAULT_FROM: str = "no-reply@example.com"
-
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
+    MAIL_FROM: str = "no-reply@example.com"    # Redis
+    
+    REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
-    REDIS_URL: Optional[str] = None
+    
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     # AWS SES
     AWS_REGION: Optional[str] = None

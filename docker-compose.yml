@@ -13,7 +13,6 @@ services:
       - SMTP_USER=
       - SMTP_PASS=
       - DEFAULT_FROM=no-reply@example.com
-      - SERVICE_API_KEY=change-me
     depends_on:
       - redis
       - mailhog

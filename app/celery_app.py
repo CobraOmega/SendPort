@@ -1,8 +1,8 @@
 from .config import settings
 from celery import Celery
 
-broker = settings.get_redis_url()
-backend = settings.get_redis_url()
+broker = settings.REDIS_URL
+backend = settings.REDIS_URL
 
 celery_app = Celery(
     "sendport",
@@ -18,3 +18,5 @@ celery_app.conf.update(
     timezone="UTC",
     enable_utc=True,
 )
+
+import app.tasks

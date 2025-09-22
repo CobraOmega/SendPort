@@ -12,4 +12,4 @@ def send_email_raw_task(to, subject, body_text, body_html=None, from_email=None)
 
 @celery_app.task(name="app.tasks.send_using_template_task")
 def send_template_task(template_name, to, subject, context, from_email=None):
-    return send_using_template(template_name, to, subject, context, from_email)
+    return send_using_template(template_name, to, subject, context, from_email) 
